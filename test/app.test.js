@@ -61,7 +61,7 @@ describe("app", function() {
         });
 
 
-        describe("when the user asks for unsupport command", function() {
+        describe("when the user asks for unsupported command", function() {
             it("should warn not supported", function() {
                 return tester
                     .setup(function(api) {
