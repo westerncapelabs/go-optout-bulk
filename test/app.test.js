@@ -1,5 +1,8 @@
 var vumigo = require('vumigo_v02');
+var optoutstore = require('./optoutstore');
+var DummyOptoutResource = optoutstore.DummyOptoutResource;
 var fixtures = require('./fixtures');
+var assert = require('assert');
 var AppTester = vumigo.AppTester;
 
 
@@ -14,55 +17,65 @@ describe("app", function() {
             tester = new AppTester(app);
 
             tester
+                .setup(function(api) {
+                    api.resources.add(new DummyOptoutResource());
+                    api.resources.attach(api);
+                })
                 .setup.config.app({
-                    name: 'test_app'
+                    name: 'test_app',
+                    opt_outs: ["27003", "27004", "27005"]
                 })
                 .setup(function(api) {
                     fixtures().forEach(api.http.fixtures.add);
                 });
         });
 
-        describe("when the user starts a session", function() {
-            it("should ask them what they want to do", function() {
+        describe("when the user starts a session to run opt outs", function() {
+            it("should complete and return thanks", function() {
                 return tester
-                    .start()
-                    .check.interaction({
-                        state: 'states:start',
-                        reply: [
-                            'Hi there! What do you want to do?',
-                            '1. Show this menu again',
-                            '2. Exit'
-                        ].join('\n')
+                    .setup(function(api) {
+                        api.contacts.add({
+                            msisdn: '+27001',
+                            key: "63ee4fa9-6888-4f0c-065a-939dc2473a99",
+                            user_account: "4a11907a-4cc4-415a-9011-58251e15e2b4"
+                        });
                     })
+                    .setup.user.addr('27001')
+                    .input('RUN')
+                    .check.interaction({
+                        state: 'states_opt_out_complete',
+                        reply:
+                            'Thank you. Opt outs run.'
+                    })
+                    .check(function(api) {
+                        // var optouts = _.find(api.optout.optout_store, { msisdn: '27003' });
+                        var optoutstore = api.optout.optout_store;
+                        assert.equal(optoutstore[0], "msisdn:+27831112222");
+                        assert.equal(optoutstore[1], "msisdn:27003");
+                        assert.equal(optoutstore[2], "msisdn:27004");
+                        assert.equal(optoutstore[3], "msisdn:27005");
+                    })
+                    .check.reply.ends_session()
                     .run();
             });
         });
 
-        describe("when the user asks to see the menu again", function() {
-            it("should show the menu again", function() {
-                return tester
-                    .setup.user.state('states:start')
-                    .input('1')
-                    .check.interaction({
-                        state: 'states:start',
-                        reply: [
-                            'Hi there! What do you want to do?',
-                            '1. Show this menu again',
-                            '2. Exit'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
 
-        describe("when the user asks to exit", function() {
-            it("should say thank you and end the session", function() {
+        describe("when the user asks for unsupport command", function() {
+            it("should warn not supported", function() {
                 return tester
-                    .setup.user.state('states:start')
-                    .input('2')
+                    .setup(function(api) {
+                        api.contacts.add({
+                            msisdn: '+27001',
+                            key: "63ee4fa9-6888-4f0c-065a-939dc2473a99",
+                            user_account: "4a11907a-4cc4-415a-9011-58251e15e2b4"
+                        });
+                    })
+                    .setup.user.addr('27001')
+                    .input('DELETEALL')
                     .check.interaction({
-                        state: 'states:end',
-                        reply: 'Thanks, cheers!'
+                        state: 'states_default',
+                        reply: 'Command not recognised'
                     })
                     .check.reply.ends_session()
                     .run();
