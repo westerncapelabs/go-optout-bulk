@@ -1,30 +1,31 @@
 {
-  "name": "go-jsbox-skeleton",
-  "version": "0.2.0",
-  "description": "Skeleton for a vumi javascript sandbox app",
-  "main": "lib/app.js",
+  "name": "go-optout-bulk",
+  "version": "0.0.1",
+  "description": "Helper app to trigger optout management in lieu of an API",
+  "main": "src/app.js",
   "scripts": {
     "test": "grunt test"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/praekelt/go-jsbox-skeleton.git"
+    "url": "https://github.com/westerncapelabs/go-optout-bulk"
   },
   "keywords": [
     "vumi",
     "sandbox"
   ],
-  "author": "Praekelt Foundation",
+  "author": "Western Cape Labs",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/praekelt/go-jsbox-skeleton/issues"
+    "url": "https://github.com/praekelt/go-refugeerights/issues"
   },
-  "homepage": "https://github.com/praekelt/go-jsbox-skeleton",
+  "homepage": "https://github.com/praekelt/go-refugeerights",
   "dependencies": {
     "vumigo_v02": "~0.2",
     "q": "~0.9",
     "lodash": "~2.4.1",
-    "moment": "~2.5.1"
+    "moment": "~2.6.0",
+    "go-jsbox-metrics-helper": "~0.1.1"
   },
   "devDependencies": {
     "mocha": "~1.18",
